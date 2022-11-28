@@ -8,8 +8,14 @@ public class CloudletTaskGroup {
 	
 	private List<CloudletTask> memberTaskList;
 	
+	/**
+     * The index of the active running task or -1 if no task has started yet.
+     */
+	private int currentTaskNum;
+	
 	public CloudletTaskGroup() {
 		memberTaskList = new ArrayList<CloudletTask>();
+		currentTaskNum = -1;
 	}
 	
 	public CloudletTaskGroup(List<CloudletTask> taskList) {
@@ -29,6 +35,10 @@ public class CloudletTaskGroup {
 	
 	public List<CloudletTask> getTasks(){
 		return Collections.unmodifiableList(memberTaskList);
+	}
+	
+	public CloudletTask getCurrentTask() {
+		return memberTaskList.get(currentTaskNum);
 	}
 	
 }
