@@ -1,6 +1,7 @@
 package org.cloudbus.cloudsim.cloudlets.network;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CloudletTaskGroup {
@@ -24,6 +25,10 @@ public class CloudletTaskGroup {
 	public void removeTask(CloudletTask task) {
 		task.removeTaskGroup();
 		memberTaskList.remove(task);
+	}
+	
+	public List<CloudletTask> getTasks(){
+		return Collections.unmodifiableList(memberTaskList);
 	}
 	
 }
