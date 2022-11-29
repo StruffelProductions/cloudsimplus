@@ -48,11 +48,6 @@ public class NetworkCloudlet extends CloudletSimple {
 	
 	private final CloudletTaskGroup defaultTaskGroup;
 
-    /**
-     * The index of the active running task or -1 if no task has started yet.
-     */
-    private List<Integer> currentTaskNums;
-
     /** @see #getTasks() */
     //private final List<CloudletTask> tasks;
 
@@ -80,7 +75,7 @@ public class NetworkCloudlet extends CloudletSimple {
         this.defaultTaskGroup = new CloudletTaskGroup();
         this.taskGroups.add(defaultTaskGroup);
         
-        this.currentTaskNums = new ArrayList<Integer>();
+        //this.currentTaskNums = new ArrayList<Integer>();
     }
 
     public double getNumberOfTasks() {
@@ -110,6 +105,15 @@ public class NetworkCloudlet extends CloudletSimple {
     	
         return Collections.unmodifiableList(allTasks);
     }
+    
+    public List<CloudletTaskGroup> getTaskGroups(){
+    	return Collections.unmodifiableList(taskGroups);
+    }
+    
+    public NetworkCloudlet addTaskGroup(final CloudletTaskGroup taskGroup) {
+    	this.taskGroups.add(taskGroup);
+    	return this;
+    }
 
     /**
      * Checks if some Cloudlet Task has started yet.
@@ -117,7 +121,13 @@ public class NetworkCloudlet extends CloudletSimple {
      * @return true if some task has started, false otherwise
      */
     public boolean isTasksStarted() {
-    	return !currentTaskNums.isEmpty();
+    	for(CloudletTaskGroup g : this.taskGroups) {
+    		if(g.getCurrentTaskNum() >= 0) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
     }
 
     /**
@@ -128,10 +138,16 @@ public class NetworkCloudlet extends CloudletSimple {
      * @return true if the current task finished and the next one was started, false otherwise
      */
     public boolean startNextTaskIfCurrentIsFinished(final double nextTaskStartTime){
-        return
-            getNextTaskIfCurrentIfFinished()
-                .map(task -> task.setStartTime(nextTaskStartTime))
-                .isPresent();
+    	
+    	boolean newTaskWasStarted = false;
+    	
+    	for(CloudletTaskGroup g : taskGroups) {
+    		newTaskWasStarted = g.getNextTaskIfCurrentIfFinished()
+    		.map(task -> task.setStartTime(nextTaskStartTime))
+            .isPresent() || newTaskWasStarted;
+    	}
+    	
+        return newTaskWasStarted;
     }
 
     /**
@@ -139,36 +155,30 @@ public class NetworkCloudlet extends CloudletSimple {
      * or an {@link Optional#empty()} if there is no current task yet.
      * @return
      */
-    public Optional<CloudletTask> getCurrentTask() {
-        if (currentTaskNum < 0 || currentTaskNum >= tasks.size()) {
-            return Optional.empty();
-        }
+    public Optional<List<CloudletTask>> getCurrentTasks() {
+    	
+    	List<CloudletTask> currentTasks = new ArrayList<CloudletTask>();
+    	
+    	for(CloudletTaskGroup g : taskGroups) {
+    		if(g.isRunning()) {
+    			currentTasks.add(g.getCurrentTask());
+    		}
+    	}
+  
+    	if (currentTasks.isEmpty()) {
+    		return Optional.empty();
+    	}else {
+    		return Optional.of(currentTasks);
+    	}
 
-        return Optional.of(tasks.get(currentTaskNum));
+        
     }
 
-    /**
-     * Gets an {@link Optional} containing the next task in the list if the current task is finished.
-     *
-     * @return the next task if the current one is finished;
-     *         otherwise an {@link Optional#empty()} if the current task is already the last one,
-     *         or it is not finished yet.
-     */
-    private Optional<CloudletTask> getNextTaskIfCurrentIfFinished(){
-        if(getCurrentTask().filter(CloudletTask::isActive).isPresent()) {
-            return Optional.empty();
-        }
 
-        if(this.currentTaskNum <= tasks.size()-1) {
-            this.currentTaskNum++;
-        }
-
-        return getCurrentTask();
-    }
 
     @Override
     public boolean isFinished() {
-        final boolean allTasksFinished = tasks.stream().allMatch(CloudletTask::isFinished);
+        final boolean allTasksFinished = getTasks().stream().allMatch(CloudletTask::isFinished);
         return super.isFinished() && allTasksFinished;
     }
 
@@ -197,7 +207,7 @@ public class NetworkCloudlet extends CloudletSimple {
     public NetworkCloudlet addTask(final CloudletTask task) {
         Objects.requireNonNull(task);
         task.setCloudlet(this);
-        tasks.add(task);
+        defaultTaskGroup.addTask(task);
         return this;
     }
 
