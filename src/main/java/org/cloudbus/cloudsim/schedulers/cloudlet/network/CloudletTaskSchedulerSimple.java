@@ -93,7 +93,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
 
     private void updateNetworkTasks(final NetworkCloudlet cloudlet) {
         //TODO Needs to use polymorphism to avoid these ifs
-        cloudlet.getCurrentTask().ifPresent(task -> {
+        cloudlet.getCurrentTasks().ifPresent(task -> {
             if (task instanceof CloudletSendTask sendTask)
                addPacketsToBeSentFromVm(cloudlet, sendTask);
             else if (task instanceof CloudletReceiveTask receiveTask)
@@ -111,8 +111,14 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
         if(isNotNetworkCloudlet(cloudlet)) {
             return true;
         }
+        
+        boolean isTimeToUpdateProcessing = false;
+        
+        for(CloudletTask t : ((NetworkCloudlet)cloudlet).getCurrentTasks().orElse(new ArrayList<CloudletTask>())) {
+        	isTimeToUpdateProcessing = t.isExecutionTask() || isTimeToUpdateProcessing;
+        }
 
-        return ((NetworkCloudlet)cloudlet).getCurrentTask().filter(CloudletTask::isExecutionTask).isPresent();
+        return isTimeToUpdateProcessing;
     }
 
     private boolean isNotNetworkCloudlet(final Cloudlet cloudlet) {
@@ -179,7 +185,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
      * @return the current task after casting it
      */
     private <T extends CloudletTask> Optional<T> getCloudletCurrentTask(final NetworkCloudlet cloudlet) {
-        return cloudlet.getCurrentTask().map(task -> (T) task);
+        return cloudlet.getCurrentTasks().map(task -> (T) task);
     }
 
     /**
