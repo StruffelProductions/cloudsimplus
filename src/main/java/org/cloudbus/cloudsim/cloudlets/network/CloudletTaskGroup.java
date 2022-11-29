@@ -46,4 +46,28 @@ public class CloudletTaskGroup {
 		return currentTaskNum;
 	}
 	
+	public boolean isRunning() {
+		return currentTaskNum >= 0;
+	}
+	
+	/**
+     * Gets an {@link Optional} containing the next task in the list if the current task is finished.
+     *
+     * @return the next task if the current one is finished;
+     *         otherwise an {@link Optional#empty()} if the current task is already the last one,
+     *         or it is not finished yet.
+     */
+    Optional<CloudletTask> getNextTaskIfCurrentIfFinished(){
+    	
+        if(getCurrentTask().isActive()) {
+            return Optional.empty();
+        }
+
+        if(this.currentTaskNum <= tasks.size()-1) {
+            this.currentTaskNum++;
+        }
+
+        return Optional.of(getCurrentTask());
+    }
+	
 }
