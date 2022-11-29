@@ -3,10 +3,11 @@ package org.cloudbus.cloudsim.cloudlets.network;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class CloudletTaskGroup {
 	
-	private List<CloudletTask> memberTaskList;
+	private List<CloudletTask> tasks;
 	
 	/**
      * The index of the active running task or -1 if no task has started yet.
@@ -14,31 +15,31 @@ public class CloudletTaskGroup {
 	private int currentTaskNum;
 	
 	public CloudletTaskGroup() {
-		memberTaskList = new ArrayList<CloudletTask>();
+		tasks = new ArrayList<CloudletTask>();
 		currentTaskNum = -1;
 	}
 	
 	public CloudletTaskGroup(List<CloudletTask> taskList) {
 		this();
-		memberTaskList.addAll(taskList);
+		tasks.addAll(taskList);
 	}
 	
 	public void addTask(CloudletTask task) {
 		task.setTaskGroup(this);
-		memberTaskList.add(task);
+		tasks.add(task);
 	}
 	
 	public void removeTask(CloudletTask task) {
 		task.removeTaskGroup();
-		memberTaskList.remove(task);
+		tasks.remove(task);
 	}
 	
 	public List<CloudletTask> getTasks(){
-		return Collections.unmodifiableList(memberTaskList);
+		return Collections.unmodifiableList(tasks);
 	}
 	
 	public CloudletTask getCurrentTask() {
-		return memberTaskList.get(currentTaskNum);
+		return tasks.get(currentTaskNum);
 	}
 	
 	public int getCurrentTaskNum(){
