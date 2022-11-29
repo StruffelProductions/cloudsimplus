@@ -41,4 +41,8 @@ public class CloudletTaskGroup {
 		return memberTaskList.get(currentTaskNum);
 	}
 	
+	public int getCurrentTaskNum(){
+		return currentTaskNum;
+	}
+	
 }
