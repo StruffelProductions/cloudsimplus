@@ -67,7 +67,7 @@ public class NetworkCloudletMT extends CloudletSimple {
         boolean tasksStarted = false;
         
         for(CloudletTaskGroup g : this.taskGroups) {
-        	tasksStarted = g.isRunning() || tasksStarted;
+        	tasksStarted = g.isActive() || tasksStarted;
         }
         
         return tasksStarted;
@@ -82,7 +82,7 @@ public class NetworkCloudletMT extends CloudletSimple {
      */
     public boolean startNextTaskIfOneOfCurrentIsFinished(final double nextTaskStartTime){
         return
-            getNextTaskIfCurrentIfFinished()
+            getNextTaskIfCurrentIsFinished()
                 .map(task -> task.setStartTime(nextTaskStartTime))
                 .isPresent();
     }

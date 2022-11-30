@@ -115,7 +115,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
         return ((NetworkCloudlet)cloudlet).getCurrentTask().filter(CloudletTask::isExecutionTask).isPresent();
     }
 
-    private boolean isNotNetworkCloudlet(final Cloudlet cloudlet) {
+    boolean isNotNetworkCloudlet(final Cloudlet cloudlet) {
         return !(cloudlet instanceof NetworkCloudlet);
     }
 
@@ -127,7 +127,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
      * @param sourceCloudlet cloudlet to get the list of packets to send
      * @param task the network task that will send the packets
      */
-    private void addPacketsToBeSentFromVm(final NetworkCloudlet sourceCloudlet, final CloudletSendTask task) {
+    void addPacketsToBeSentFromVm(final NetworkCloudlet sourceCloudlet, final CloudletSendTask task) {
         LOGGER.trace(
             "{}: {}: {} pkts added to be sent from {} in {}",
             sourceCloudlet.getSimulation().clockStr(), getClass().getSimpleName(),
@@ -145,7 +145,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
      *                                    which is going to be checked if there are packets targeting it.
      * @param task the network task that will receive the packets
      */
-    private void receivePackets(final NetworkCloudlet destinationCloudlet, final CloudletReceiveTask task) {
+     void receivePackets(final NetworkCloudlet destinationCloudlet, final CloudletReceiveTask task) {
         final List<VmPacket> receivedPkts = getPacketsSentToCloudlet(task);
         // Assumption: packet will not arrive in the same cycle
         receivedPkts.forEach(task::receivePacket);
@@ -164,7 +164,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
         scheduleNextTaskIfCurrentIsFinished(destinationCloudlet);
     }
 
-    private void logReceivedPacket(final NetworkCloudlet destinationCloudlet, final VmPacket pkt) {
+     void logReceivedPacket(final NetworkCloudlet destinationCloudlet, final VmPacket pkt) {
         LOGGER.trace(
             "{}: {}: {} in {} received pkt with {} bytes from {} in {}",
             destinationCloudlet.getSimulation().clockStr(), getClass().getSimpleName(),
@@ -178,7 +178,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
      * @param <T> the generic type to cast the task to
      * @return the current task after casting it
      */
-    private <T extends CloudletTask> Optional<T> getCloudletCurrentTask(final NetworkCloudlet cloudlet) {
+     <T extends CloudletTask> Optional<T> getCloudletCurrentTask(final NetworkCloudlet cloudlet) {
         return cloudlet.getCurrentTask().map(task -> (T) task);
     }
 
@@ -191,7 +191,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
      * @return the list of packets targeting the {@link NetworkCloudlet} or an empty list
      *         if there are no packets received that are targeting such a Cloudlet.
      */
-    private List<VmPacket> getPacketsSentToCloudlet(final CloudletReceiveTask receiveTask) {
+     List<VmPacket> getPacketsSentToCloudlet(final CloudletReceiveTask receiveTask) {
         final List<VmPacket> pktsFromExpectedSenderVm = getListOfPacketsSentFromVm(receiveTask.getSourceVm());
 
         return pktsFromExpectedSenderVm
@@ -204,7 +204,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
     /**
      * Schedules the execution of the next task of a given cloudlet.
      */
-    private void scheduleNextTaskIfCurrentIsFinished(final NetworkCloudlet cloudlet) {
+     void scheduleNextTaskIfCurrentIsFinished(final NetworkCloudlet cloudlet) {
         if(!cloudlet.startNextTaskIfCurrentIsFinished(cloudlet.getSimulation().clock())){
             return;
         }

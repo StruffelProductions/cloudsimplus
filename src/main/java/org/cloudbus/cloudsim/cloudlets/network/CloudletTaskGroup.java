@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.cloudbus.cloudsim.core.CloudSimTag;
+
 public class CloudletTaskGroup {
 	
 	private List<CloudletTask> tasks;
