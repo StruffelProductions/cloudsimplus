@@ -15,6 +15,7 @@ public class CloudletTaskGroup {
      * The index of the active running task or -1 if no task has started yet.
      */
 	private int currentTaskNum;
+	private NetworkCloudletMT cloudlet;
 	
 	public CloudletTaskGroup() {
 		tasks = new ArrayList<CloudletTask>();
@@ -60,6 +61,14 @@ public class CloudletTaskGroup {
 		return isFinished;
 	}
 	
+	public NetworkCloudletMT getCloudlet() {
+		return cloudlet;
+	}
+	
+	public void setCloudlet(NetworkCloudletMT cloudlet) {
+		this.cloudlet = cloudlet;
+	}
+	
 
 	
 	/**
@@ -80,6 +89,20 @@ public class CloudletTaskGroup {
         }
 
         return Optional.of(getCurrentTask());
+    }
+    
+    /**
+     * Change the current task to the next one in order
+     * to start executing it, if the current task is finished.
+     *
+     * @param nextTaskStartTime the time that the next task will start
+     * @return true if the current task finished and the next one was started, false otherwise
+     */
+    public boolean startNextTaskIfCurrentIsFinished(final double nextTaskStartTime){
+        return
+            getNextTaskIfCurrentIsFinished()
+                .map(task -> task.setStartTime(nextTaskStartTime))
+                .isPresent();
     }
     
     public long getLength() {

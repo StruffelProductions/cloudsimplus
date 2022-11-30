@@ -12,7 +12,7 @@ import org.cloudbus.cloudsim.utilizationmodels.UtilizationModel;
 import org.cloudbus.cloudsim.vms.Vm;
 import org.cloudbus.cloudsim.vms.network.NetworkVm;
 
-public class NetworkCloudletMT extends CloudletSimple {
+public class NetworkCloudletMT extends NetworkCloudlet {
 
     /** @see #getTasks() */
     private final List<CloudletTaskGroup> taskGroups;
@@ -50,6 +50,16 @@ public class NetworkCloudletMT extends CloudletSimple {
         }
     	return numberOfTasks;
     }
+    
+    public List<CloudletTask> getTasks(){
+
+        ArrayList<CloudletTask> tasks = new ArrayList<CloudletTask>();
+    	for(CloudletTaskGroup g : this.taskGroups) {
+        	tasks.addAll(g.getTasks());
+        }
+    	return tasks;
+
+    }
 
     /**
      * @return a read-only list of Cloudlet's tasks.
@@ -71,20 +81,6 @@ public class NetworkCloudletMT extends CloudletSimple {
         }
         
         return tasksStarted;
-    }
-
-    /**
-     * Change the current task to the next one in order
-     * to start executing it, if the current task is finished.
-     *
-     * @param nextTaskStartTime the time that the next task will start
-     * @return true if the current task finished and the next one was started, false otherwise
-     */
-    public boolean startNextTaskIfOneOfCurrentIsFinished(final double nextTaskStartTime){
-        return
-            getNextTaskIfCurrentIsFinished()
-                .map(task -> task.setStartTime(nextTaskStartTime))
-                .isPresent();
     }
 
     /**
@@ -170,7 +166,7 @@ public class NetworkCloudletMT extends CloudletSimple {
      */
     public NetworkCloudletMT addTask(final CloudletTask task) {
         Objects.requireNonNull(task);
-        //task.setCloudlet(this);
+        task.setCloudlet(this);
         defaultTaskGroup.addTask(task);
         return this;
     }

@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.cloudbus.cloudsim.cloudlets.Cloudlet;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletExecutionTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletReceiveTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletSendTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletTask;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
 import org.cloudbus.cloudsim.cloudlets.network.NetworkCloudlet;
 import org.cloudbus.cloudsim.cloudlets.network.NetworkCloudletMT;
 import org.cloudbus.cloudsim.core.CloudSimTag;
@@ -38,24 +40,59 @@ public class CloudletTaskSchedulerMT extends CloudletTaskSchedulerSimple impleme
             return;
         }
 		
+		
 		if (!netCloudletMT.isTasksStarted()) {
-            scheduleNextTaskIfCurrentIsFinished(netCloudletMT);
-            return;
+
+				scheduleNextTaskIfCurrentIsFinishedForAllGroups(netCloudletMT);
+       
+				return;
         }
 		
 		// split the MI across all exec tasks
 		
+		if(isTimeToUpdateCloudletProcessing(netCloudletMT)) {
+			updateExecutionTasks(netCloudletMT,partialFinishedMI);
+		}
 		
 		
 		// then run network tasks
 		
-		updateNetworkTasks((NetworkCloudletMT) cloudlet);
+		super.updateNetworkTasks((NetworkCloudlet) cloudlet);
 
 	}
 	
+	private void updateExecutionTasks(NetworkCloudletMT netCloudlet, long partialMI) {
+		long pes = netCloudlet.getNumberOfPes();
+		
+		List<CloudletTask> currentExecTasks = netCloudlet.getCurrentTasks().get().stream().filter(t -> t.isExecutionTask()).collect(Collectors.toList());
+		
+		Collections.shuffle(currentExecTasks);
+		
+		var limit = Math.max(pes, currentExecTasks.size()-1);
+		
+		for(int i = 0 ; i < limit ; i++) {
+			( (CloudletExecutionTask)currentExecTasks.get(i) ).process(partialMI / limit);
+		}
+		
+		
+	}
+
+	
+	/**
+     * Schedules the execution of the next task of a given cloudlet.
+     */
+     private void scheduleNextTaskIfCurrentIsFinished(final CloudletTaskGroup taskGroup) {
+        if(!taskGroup.startNextTaskIfCurrentIsFinished(taskGroup.getCloudlet().getSimulation().clock())){
+            return;
+        }
+
+        final var dc = taskGroup.getCloudlet().getVm().getHost().getDatacenter();
+        dc.schedule(dc, dc.getSimulation().getMinTimeBetweenEvents(), CloudSimTag.VM_UPDATE_CLOUDLET_PROCESSING);
+    }
+	
 	private void scheduleNextTaskIfCurrentIsFinishedForAllGroups(NetworkCloudletMT cloudlet) {
 		for(CloudletTaskGroup g : cloudlet.getTaskGroups()) {
-			
+			scheduleNextTaskIfCurrentIsFinished(g);
 		}
 	}
 

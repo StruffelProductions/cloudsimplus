@@ -72,7 +72,7 @@ public abstract class CloudletTask implements Identifiable {
     
     public void setTaskGroup(CloudletTaskGroup taskGroup) {
     	this.taskGroup = taskGroup;
-    	taskGroup.addTask(this);
+    	//taskGroup.addTask(this);
     }
     
     public CloudletTaskGroup getTaskGroup() {

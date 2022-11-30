@@ -91,7 +91,7 @@ public class CloudletTaskSchedulerSimple implements CloudletTaskScheduler {
         });
     }
 
-    private void updateNetworkTasks(final NetworkCloudlet cloudlet) {
+    void updateNetworkTasks(final NetworkCloudlet cloudlet) {
         //TODO Needs to use polymorphism to avoid these ifs
         cloudlet.getCurrentTask().ifPresent(task -> {
             if (task instanceof CloudletSendTask sendTask)
