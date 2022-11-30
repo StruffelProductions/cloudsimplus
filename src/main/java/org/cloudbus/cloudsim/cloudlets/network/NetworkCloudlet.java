@@ -40,16 +40,17 @@ import java.util.*;
  * TODO Check how to implement the NULL pattern for this class.
  */
 public class NetworkCloudlet extends CloudletSimple {
-	
-	/**
-	 * The task groups assigned to this cloudlet.
-	 */
-	private final List<CloudletTaskGroup> taskGroups;
-	
-	private final CloudletTaskGroup defaultTaskGroup;
+
+    /**
+     * The index of the active running task or -1 if no task has started yet.
+     */
+    private int currentTaskNum;
 
     /** @see #getTasks() */
-    //private final List<CloudletTask> tasks;
+    private final List<CloudletTask> tasks;
+
+    /** @see #getMemory() */
+    private long memory;
 
     /**
      * Creates a NetworkCloudlet with no priority and file size and output size equal to 1.
@@ -70,49 +71,44 @@ public class NetworkCloudlet extends CloudletSimple {
      */
     public NetworkCloudlet(final int id,  final long length, final int pesNumber) {
         super(id, length, pesNumber);
-        
-        this.taskGroups = new ArrayList<CloudletTaskGroup>();
-        this.defaultTaskGroup = new CloudletTaskGroup();
-        this.taskGroups.add(defaultTaskGroup);
-        
-        //this.currentTaskNums = new ArrayList<Integer>();
+        this.currentTaskNum = -1;
+        this.memory = 0;
+        this.tasks = new ArrayList<>();
     }
 
     public double getNumberOfTasks() {
-    	
-    	int numberOfTasks = 0;
-    	
-    	for(CloudletTaskGroup g : this.taskGroups) {
-    		numberOfTasks += g.getTasks().size();
-    	}
-    	
-        return numberOfTasks;
+        return tasks.size();
     }
 
     /**
      * @return a read-only list of Cloudlet's tasks.
-     * 
-     * TODO This used to be an ordered list but "order" is no longer really a concrete thing with multithreading.
-     * How can we deal with this?
      */
     public List<CloudletTask> getTasks() {
-    	
-    	List<CloudletTask> allTasks = new ArrayList<CloudletTask>();
-    	
-    	for(CloudletTaskGroup g : this.taskGroups) {
-    		allTasks.addAll(g.getTasks());
-    	}
-    	
-        return Collections.unmodifiableList(allTasks);
+        return Collections.unmodifiableList(tasks);
     }
-    
-    public List<CloudletTaskGroup> getTaskGroups(){
-    	return Collections.unmodifiableList(taskGroups);
+
+    /**
+     * Gets the Cloudlet's RAM memory (in Megabytes).
+     * TODO Required, allocated, used memory? It doesn't appear to be used.
+     */
+    public long getMemory() {
+        return memory;
     }
-    
-    public NetworkCloudlet addTaskGroup(final CloudletTaskGroup taskGroup) {
-    	this.taskGroups.add(taskGroup);
-    	return this;
+
+    /**
+     * Sets the Cloudlet's RAM memory.
+     * @param memory amount of RAM to set (in Megabytes)
+     * TODO Cloudlet has the {@link #getUtilizationModelRam()} that defines
+     *       how RAM is used. This way, this attribute doesn't make sense
+     *       since usage of RAM is dynamic.
+     *       The attribute would be used to know what is the maximum
+     *       memory the cloudlet can use, but that will be the
+     *       maximum VM RAM capacity or a different value
+     *       defined by a UtilizationModel.
+     */
+    public NetworkCloudlet setMemory(final long memory) {
+        this.memory = memory;
+        return this;
     }
 
     /**
@@ -121,13 +117,7 @@ public class NetworkCloudlet extends CloudletSimple {
      * @return true if some task has started, false otherwise
      */
     public boolean isTasksStarted() {
-    	for(CloudletTaskGroup g : this.taskGroups) {
-    		if(g.getCurrentTaskNum() >= 0) {
-    			return true;
-    		}
-    	}
-    	
-    	return false;
+        return currentTaskNum > -1;
     }
 
     /**
@@ -138,16 +128,10 @@ public class NetworkCloudlet extends CloudletSimple {
      * @return true if the current task finished and the next one was started, false otherwise
      */
     public boolean startNextTaskIfCurrentIsFinished(final double nextTaskStartTime){
-    	
-    	boolean newTaskWasStarted = false;
-    	
-    	for(CloudletTaskGroup g : taskGroups) {
-    		newTaskWasStarted = g.getNextTaskIfCurrentIfFinished()
-    		.map(task -> task.setStartTime(nextTaskStartTime))
-            .isPresent() || newTaskWasStarted;
-    	}
-    	
-        return newTaskWasStarted;
+        return
+            getNextTaskIfCurrentIfFinished()
+                .map(task -> task.setStartTime(nextTaskStartTime))
+                .isPresent();
     }
 
     /**
@@ -155,30 +139,36 @@ public class NetworkCloudlet extends CloudletSimple {
      * or an {@link Optional#empty()} if there is no current task yet.
      * @return
      */
-    public Optional<List<CloudletTask>> getCurrentTasks() {
-    	
-    	List<CloudletTask> currentTasks = new ArrayList<CloudletTask>();
-    	
-    	for(CloudletTaskGroup g : taskGroups) {
-    		if(g.isRunning()) {
-    			currentTasks.add(g.getCurrentTask());
-    		}
-    	}
-  
-    	if (currentTasks.isEmpty()) {
-    		return Optional.empty();
-    	}else {
-    		return Optional.of(currentTasks);
-    	}
+    public Optional<CloudletTask> getCurrentTask() {
+        if (currentTaskNum < 0 || currentTaskNum >= tasks.size()) {
+            return Optional.empty();
+        }
 
-        
+        return Optional.of(tasks.get(currentTaskNum));
     }
 
+    /**
+     * Gets an {@link Optional} containing the next task in the list if the current task is finished.
+     *
+     * @return the next task if the current one is finished;
+     *         otherwise an {@link Optional#empty()} if the current task is already the last one,
+     *         or it is not finished yet.
+     */
+    private Optional<CloudletTask> getNextTaskIfCurrentIfFinished(){
+        if(getCurrentTask().filter(CloudletTask::isActive).isPresent()) {
+            return Optional.empty();
+        }
 
+        if(this.currentTaskNum <= tasks.size()-1) {
+            this.currentTaskNum++;
+        }
+
+        return getCurrentTask();
+    }
 
     @Override
     public boolean isFinished() {
-        final boolean allTasksFinished = getTasks().stream().allMatch(CloudletTask::isFinished);
+        final boolean allTasksFinished = tasks.stream().allMatch(CloudletTask::isFinished);
         return super.isFinished() && allTasksFinished;
     }
 
@@ -207,7 +197,7 @@ public class NetworkCloudlet extends CloudletSimple {
     public NetworkCloudlet addTask(final CloudletTask task) {
         Objects.requireNonNull(task);
         task.setCloudlet(this);
-        defaultTaskGroup.addTask(task);
+        tasks.add(task);
         return this;
     }
 
