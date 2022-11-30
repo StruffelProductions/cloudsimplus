@@ -46,9 +46,19 @@ public class CloudletTaskGroup {
 		return currentTaskNum;
 	}
 	
-	public boolean isRunning() {
-		return currentTaskNum >= 0;
+	public boolean isActive() {
+		return currentTaskNum > -1;
 	}
+	
+	public boolean isFinished() {
+		boolean isFinished = true;
+		for(CloudletTask t : this.tasks) {
+			isFinished = t.isFinished() && isFinished;
+		}
+		return isFinished;
+	}
+	
+
 	
 	/**
      * Gets an {@link Optional} containing the next task in the list if the current task is finished.
@@ -57,7 +67,7 @@ public class CloudletTaskGroup {
      *         otherwise an {@link Optional#empty()} if the current task is already the last one,
      *         or it is not finished yet.
      */
-    Optional<CloudletTask> getNextTaskIfCurrentIfFinished(){
+    Optional<CloudletTask> getNextTaskIfCurrentIsFinished(){
     	
         if(getCurrentTask().isActive()) {
             return Optional.empty();
@@ -68,6 +78,14 @@ public class CloudletTaskGroup {
         }
 
         return Optional.of(getCurrentTask());
+    }
+    
+    public long getLength() {
+        return getTasks().stream()
+                .filter(CloudletTask::isExecutionTask)
+                .map(task -> (CloudletExecutionTask)task)
+                .mapToLong(CloudletExecutionTask::getLength)
+                .sum();
     }
 	
 }
