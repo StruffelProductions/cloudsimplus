@@ -78,6 +78,10 @@ public class CloudletSendTask extends CloudletTask {
         packetsToSend.add(packet);
         return packet;
     }
+    
+    public void addPacket(final VmPacket packet) {
+    	packetsToSend.add(packet);
+    }
 
     /**
      * @return a <b>read-only</b> list of packets to send
