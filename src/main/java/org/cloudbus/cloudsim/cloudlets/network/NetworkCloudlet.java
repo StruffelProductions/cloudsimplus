@@ -11,7 +11,14 @@ import org.cloudbus.cloudsim.cloudlets.Cloudlet;
 import org.cloudbus.cloudsim.cloudlets.CloudletSimple;
 import org.cloudbus.cloudsim.vms.Vm;
 import org.cloudbus.cloudsim.vms.network.NetworkVm;
+import org.cloudsimplus.listeners.CloudletVmEventInfo;
+import org.cloudsimplus.listeners.EventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static java.util.Objects.requireNonNull;
+
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -44,6 +51,9 @@ public class NetworkCloudlet extends CloudletSimple {
     /** @see #getTasks() */
     private final List<CloudletTaskGroup> taskGroups;
     private CloudletTaskGroup defaultTaskGroup;
+    Logger LOGGER = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    
+    private final Set<EventListener<CloudletVmEventInfo>> onTaskFinishListeners;
 
     /**
      * Creates a NetworkCloudlet with no priority and file size and output size equal to 1.
@@ -53,6 +63,7 @@ public class NetworkCloudlet extends CloudletSimple {
      */
     public NetworkCloudlet(final long length, final int pesNumber) {
         this(-1, length, pesNumber);
+        
     }
 
     /**
@@ -68,6 +79,7 @@ public class NetworkCloudlet extends CloudletSimple {
         this.defaultTaskGroup.setCloudlet(this);
         this.defaultTaskGroup.setId(0);
         this.taskGroups = new ArrayList<>();
+        this.onTaskFinishListeners = new HashSet<>();
         this.taskGroups.add(defaultTaskGroup);
     }
 
@@ -206,4 +218,18 @@ public class NetworkCloudlet extends CloudletSimple {
 
         throw new IllegalArgumentException("NetworkCloudlet can just be executed by a NetworkVm");
     }
+    
+    public Cloudlet addOnTaskFinishListener(final EventListener<CloudletVmEventInfo> listener) {
+        this.onTaskFinishListeners.add(requireNonNull(listener));
+        return this;
+    }
+
+    public boolean removeOnTaskFinishListener(final EventListener<CloudletVmEventInfo> listener) {
+        return onTaskFinishListeners.remove(listener);
+    }
+    
+    protected void notifyOnTaskFinishListeners() {
+    	onTaskFinishListeners.forEach(listener -> listener.update(CloudletVmEventInfo.of(listener, this)));
+    }
+    
 }
