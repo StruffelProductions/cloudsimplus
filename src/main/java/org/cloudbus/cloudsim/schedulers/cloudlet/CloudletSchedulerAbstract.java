@@ -26,6 +26,7 @@ import org.cloudsimplus.listeners.CloudletResourceAllocationFailEventInfo;
 import org.cloudsimplus.listeners.EventListener;
 
 import java.io.Serial;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -514,6 +515,7 @@ public abstract class CloudletSchedulerAbstract implements CloudletScheduler {
 
     @Override
     public double updateProcessing(final double currentTime, final MipsShare mipsShare) {
+
         setCurrentMipsShare(mipsShare);
 
         if (isEmpty()) {
@@ -529,7 +531,7 @@ public abstract class CloudletSchedulerAbstract implements CloudletScheduler {
 
         setPreviousTime(currentTime);
         vm.getSimulation().setLastCloudletProcessingUpdate(currentTime);
-
+        
         return nextSimulationDelay;
     }
 
@@ -553,19 +555,22 @@ public abstract class CloudletSchedulerAbstract implements CloudletScheduler {
      */
     @SuppressWarnings("ForLoopReplaceableByForEach")
     private double updateCloudletsProcessing(final double currentTime) {
+    	
         double nextCloudletFinishTime = Double.MAX_VALUE;
         long usedPes = 0;
         /* Uses an indexed for to avoid ConcurrentModificationException,
          * e.g., in cases when Cloudlet is cancelled during simulation execution. */
         for (int i = 0; i < cloudletExecList.size(); i++) {
             final CloudletExecution cle = cloudletExecList.get(i);
+            
             updateCloudletProcessingAndPacketsDispatch(cle, currentTime);
+            
             nextCloudletFinishTime = Math.min(nextCloudletFinishTime, cloudletEstimatedFinishTime(cle, currentTime));
             usedPes += cle.getCloudlet().getNumberOfPes();
         }
 
         ((VmSimple) vm).setFreePesNumber(vm.getNumberOfPes() - usedPes);
-
+        
         return nextCloudletFinishTime;
     }
 

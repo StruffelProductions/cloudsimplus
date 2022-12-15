@@ -67,7 +67,7 @@ public class CloudletTaskGroup implements Identifiable {
 	}
 
 	public boolean isActive() {
-		return currentTaskNum > -1;
+		return currentTaskNum > -1 && currentTaskNum < getNumberOfTasks();
 	}
 
 	public boolean isFinished() {

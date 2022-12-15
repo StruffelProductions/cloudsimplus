@@ -194,6 +194,13 @@ public class NetworkCloudlet extends CloudletSimple {
     	return taskWasStarted;
     }
     
+    public NetworkCloudlet removeTaskGroup(final CloudletTaskGroup taskGroup) {
+    	Objects.requireNonNull(taskGroup);
+    	
+    	taskGroups.remove(taskGroup);
+    	return this;
+    }
+    
     public NetworkCloudlet addTaskGroup(final CloudletTaskGroup taskGroup) {
     	
     	Objects.requireNonNull(taskGroup);

@@ -190,11 +190,15 @@ public abstract class CloudletTask implements Identifiable {
         if(!this.finished && finished) {
             finishTime = cloudlet.getSimulation().clock();
             LOGGER.trace("Task {} of type {} finished on cloudlet {}",getId(),this.getClass().getSimpleName(),getCloudlet().getId());
+            
         }
 
         this.finished = finished;
         
-        if(this.finished) this.cloudlet.notifyOnTaskFinishListeners();
+        if(this.finished) {
+        	this.cloudlet.notifyOnTaskFinishListeners();
+        }
+        
     }
 
     /**
