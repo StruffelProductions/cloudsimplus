@@ -231,6 +231,10 @@ public abstract class CloudletTask implements Identifiable {
         return this instanceof CloudletReceiveTask;
     }
     
+    public boolean isWaitTask() {
+    	return this instanceof CloudletWaitTask;
+    }
+    
     public void setFinisherTask(CloudletTask task) {
     	this.finisherTask = task;
     }
