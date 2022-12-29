@@ -74,7 +74,7 @@ public class CloudletReceiveTask extends CloudletTask {
     private long expectedPacketsToReceive;
 
     /** @see #getSourceVm() */
-    private final Vm sourceVm;
+    private Vm sourceVm;
 
     /**
      * Creates a new task.
@@ -115,6 +115,10 @@ public class CloudletReceiveTask extends CloudletTask {
      */
     public Vm getSourceVm() {
         return sourceVm;
+    }
+    
+    public void setSourceVm(Vm vm) {
+    	this.sourceVm = vm;
     }
 
     /**

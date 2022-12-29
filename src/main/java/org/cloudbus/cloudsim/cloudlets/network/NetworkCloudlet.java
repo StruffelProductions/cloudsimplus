@@ -209,6 +209,24 @@ public class NetworkCloudlet extends CloudletSimple {
     	
 		return this;
     }
+    
+    protected int threadsStarted;
+    public int getThreadsStarted() {
+    	return threadsStarted;
+    }
+    
+    public void addTasksOnNewThread(List<CloudletTask> taskList) {
+		// Add new tasks as a new thread
+		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		//processingTaskGroup.setId(CcspUtil.nextId("TASKGROUP"));
+		processingTaskGroup.setCloudlet(this);
+		
+		for(CloudletTask t : taskList) {
+			processingTaskGroup.addTask(t);
+		}
+		
+		this.addTaskGroup(processingTaskGroup);
+	}
 
     @Override
     public NetworkVm getVm() {
