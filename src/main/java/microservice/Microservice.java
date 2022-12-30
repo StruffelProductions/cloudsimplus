@@ -11,6 +11,7 @@ public interface Microservice extends Identifiable {
 	public String getName();
 	public CloudletReceiveTask handleNewRequest(String requestType,CloudletSendTask taskToExpectFrom, CloudletReceiveTask taskToReportBackTo);
 	public long getUnfinishedTaskGroupCount(); 
+	public long getExecutingTaskGroupCount(); 
 	public long getTaskGroupCount(); 
 	public List<MicroserviceNetworkCloudlet> getCloudlets();
 }

@@ -57,11 +57,16 @@ public class MicroserviceManager {
 		
 	}
 	
-	public List<Double> getResponseTimes(String filterByTaskGroupName){
-		List<Double> responseTimes = new LinkedList<Double>();
+	public LinkedList<Double> getResponseTimes(String filterByTaskGroupName){
+		return getResponseTimes(0.0,filterByTaskGroupName);
+	}
+	
+	public LinkedList<Double> getResponseTimes(double start, String filterByTaskGroupName){
+		LinkedList<Double> responseTimes = new LinkedList<Double>();
+		responseTimes.add(0.0);
 		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
 			for(CloudletTaskGroup g : c.getTaskGroups()) {
-				if(g.getThreadType() == filterByTaskGroupName && g.measurementFinished()) {
+				if(g.getThreadType() == filterByTaskGroupName && g.getTasks().get(0).getStartTime() >= start && g.measurementFinished()) {
 					responseTimes.add(g.getMeasurementTime());
 				}
 			}
@@ -71,7 +76,7 @@ public class MicroserviceManager {
 	
 	public void updateClientRequests(int targetClientThreadNumber) {	
 		LOGGER.debug("{} of {} client threads active",clientService.getUnfinishedTaskGroupCount(),targetClientThreadNumber);
-		while(clientService.getUnfinishedTaskGroupCount() < targetClientThreadNumber) {
+		if(clientService.getUnfinishedTaskGroupCount() < targetClientThreadNumber) {
 			clientService.handleNewRequest("", null, null);
 		}
 	}

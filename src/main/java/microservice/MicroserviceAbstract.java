@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.cloudlets.network.CloudletReceiveTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletSendTask;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
 import org.cloudbus.cloudsim.core.Identifiable;
 
@@ -40,6 +41,20 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 		
 		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
 			threadCount += c.getTaskGroups().stream().filter(g -> !g.isFinished()).count();
+		}
+		
+		return threadCount;
+	}
+	
+	public long getExecutingTaskGroupCount() {
+		long threadCount = 0;
+		
+		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
+			for(CloudletTaskGroup g : c.getTaskGroups()) {
+				if(g.getCurrentTask().isPresent() && g.getCurrentTask().get().isExecutionTask()) {
+					threadCount++;
+				}
+			}
 		}
 		
 		return threadCount;
