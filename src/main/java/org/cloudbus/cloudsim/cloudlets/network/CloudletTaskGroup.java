@@ -18,7 +18,11 @@ public class CloudletTaskGroup implements Identifiable {
 	private int currentTaskNum;
 	private NetworkCloudlet cloudlet;
 	
+	private CloudletTask measurementStartTask;
+	private CloudletTask measurementFinishTask;
+	
 	private long id;
+	private String threadType;
 
 	public CloudletTaskGroup() {
 		tasks = new ArrayList<CloudletTask>();
@@ -29,6 +33,44 @@ public class CloudletTaskGroup implements Identifiable {
 	public CloudletTaskGroup(List<CloudletTask> taskList) {
 		this();
 		tasks.addAll(taskList);
+	}
+	
+	public void setMeasurementStartTask(int index) {
+		measurementStartTask = tasks.get(index);
+	}
+	
+	public void setMeasurementEndTask(int index) {
+		measurementFinishTask = tasks.get(index);
+	}
+	
+	public void setMeasurementStartTask(CloudletTask task) {
+		if(tasks.contains(task)) {
+			measurementStartTask = task;
+		}
+		
+	}
+	
+	public void setMeasurementEndTask(CloudletTask task) {
+		if(tasks.contains(task)) {
+			measurementFinishTask = task;
+		}
+	}
+	
+	public boolean measurementFinished() {
+		if(measurementFinishTask == null) {
+			return false;
+		}
+		else {
+			return measurementFinishTask.isFinished();
+		}
+		
+	}
+	
+	public double getMeasurementTime() {
+		// TODO: Exception handling?
+		
+		return measurementFinishTask.getFinishTime() - measurementStartTask.getFinishTime();
+		
 	}
 
 	public void addTask(CloudletTask task) {
@@ -140,6 +182,14 @@ public class CloudletTaskGroup implements Identifiable {
 	@Override
 	public long getId() {
 		return this.id;
+	}
+	
+	public void setThreadType(String threadType) {
+		this.threadType = threadType;
+	}
+	
+	public String getThreadType() {
+		return threadType;
 	}
 
 }

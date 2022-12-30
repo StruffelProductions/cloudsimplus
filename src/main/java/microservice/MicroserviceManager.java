@@ -3,20 +3,26 @@ package microservice;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
+import org.cloudsimplus.util.Log;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
 
 public class MicroserviceManager {
 	List<Microservice> services = new ArrayList<Microservice>();
-	Microservice clientService;
+	ClientMicroservice clientService;
+	org.slf4j.Logger LOGGER = LoggerFactory.getLogger(this.getClass().getSimpleName());
 	
 	public void registerService(Microservice service) {
 		services.add(service);
 	}
 	
-	public void setClientService(Microservice clientService) {
+	public void setClientService(ClientMicroservice clientService) {
 		this.clientService = clientService;
 	}
 	
@@ -51,10 +57,22 @@ public class MicroserviceManager {
 		
 	}
 	
-	public void updateClientRequests(int targetClientThreadNumber) {		
-		while(clientService.getActiveThreadCount() < targetClientThreadNumber) {
+	public List<Double> getResponseTimes(String filterByTaskGroupName){
+		List<Double> responseTimes = new LinkedList<Double>();
+		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
+			for(CloudletTaskGroup g : c.getTaskGroups()) {
+				if(g.getThreadType() == filterByTaskGroupName && g.measurementFinished()) {
+					responseTimes.add(g.getMeasurementTime());
+				}
+			}
+		}
+		return responseTimes;
+	}
+	
+	public void updateClientRequests(int targetClientThreadNumber) {	
+		LOGGER.debug("{} of {} client threads active",clientService.getUnfinishedTaskGroupCount(),targetClientThreadNumber);
+		while(clientService.getUnfinishedTaskGroupCount() < targetClientThreadNumber) {
 			clientService.handleNewRequest("", null, null);
-			LOGGER.debug("Triggered new request of type {} ({}) on cloudlet {} because it only had {}/{} requests active",requestType, requestRoundRobin,currentClientCloudlet.getId(),numberOfActiveThreads,targetNumberOfActiveThreads);
 		}
 	}
 	

@@ -58,11 +58,6 @@ public abstract class CloudletTask implements Identifiable {
     private NetworkCloudlet cloudlet;
     
     private CloudletTaskGroup taskGroup;
-    
-    private String description = "";
-    
-    private CloudletTask finisherTask = null;
-
     /**
      * Creates a new task.
      * @param id task id
@@ -235,19 +230,4 @@ public abstract class CloudletTask implements Identifiable {
     	return this instanceof CloudletWaitTask;
     }
     
-    public void setFinisherTask(CloudletTask task) {
-    	this.finisherTask = task;
-    }
-    
-    public CloudletTask getFinisherTask() {
-    	return this.finisherTask;
-    }
-    
-    public String getDescription() {
-    	return description;
-    }
-    
-    public void setDescription(String description) {
-    	this.description = description;
-    }
 }

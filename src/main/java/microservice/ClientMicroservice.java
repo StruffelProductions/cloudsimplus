@@ -1,5 +1,5 @@
 package microservice;
 
-public interface ClientMicroservice {
+public interface ClientMicroservice extends Microservice {
 
 }

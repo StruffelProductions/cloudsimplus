@@ -6,6 +6,7 @@ import org.cloudbus.cloudsim.cloudlets.network.CloudletExecutionTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletReceiveTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletSendTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletTask;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletWaitTask;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
 import org.cloudbus.cloudsim.network.TaskPacket;
 
@@ -17,6 +18,12 @@ import microservice.Microservice;
 public class TaskGenerator {
 	
 	private static int idCounter;
+	
+	public static CloudletWaitTask generateWaitTask(MicroserviceNetworkCloudlet cloudlet, double waitUntil) {
+		CloudletWaitTask waitTask = new CloudletWaitTask(idCounter++, waitUntil);
+		waitTask.setCloudlet(cloudlet);
+		return waitTask;
+	}
 	
 	public static CloudletExecutionTask generateExecutionTask(MicroserviceNetworkCloudlet cloudlet, long length) {
 		CloudletExecutionTask executionTask = new CloudletExecutionTask(idCounter++,length);
@@ -39,6 +46,7 @@ public class TaskGenerator {
 		
 		// Create the task that awaits a response from the target
 		CloudletReceiveTask awaitTargetTask = new CloudletReceiveTask(idCounter++, null);
+		awaitTargetTask.setCloudlet(cloudlet);
 		
 		// Trigger the target cloudlet to create its processing tasks
 		CloudletReceiveTask taskToTriggerOnTarget = targetService.handleNewRequest(requestType,activateTargetTask, awaitTargetTask); //targetCloudlet.prepareNewRequestHandling(awaitDbTask, masterCloudletTable,requestType);

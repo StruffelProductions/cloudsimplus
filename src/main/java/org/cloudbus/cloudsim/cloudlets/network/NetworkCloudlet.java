@@ -216,14 +216,45 @@ public class NetworkCloudlet extends CloudletSimple {
     }
     
     public void addTasksOnNewThread(List<CloudletTask> taskList) {
-		// Add new tasks as a new thread
+
 		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
-		//processingTaskGroup.setId(CcspUtil.nextId("TASKGROUP"));
 		processingTaskGroup.setCloudlet(this);
 		
 		for(CloudletTask t : taskList) {
 			processingTaskGroup.addTask(t);
 		}
+		
+		this.addTaskGroup(processingTaskGroup);
+	}
+    
+    public void addTasksOnNewThread(List<CloudletTask> taskList,int measurementStartIndex, int measurementFinishIndex, String groupName) {
+    	
+		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		processingTaskGroup.setCloudlet(this);
+		processingTaskGroup.setThreadType(groupName);
+		
+		for(CloudletTask t : taskList) {
+			processingTaskGroup.addTask(t);
+		}
+		
+		processingTaskGroup.setMeasurementStartTask(measurementStartIndex);
+		processingTaskGroup.setMeasurementEndTask(measurementFinishIndex);
+		
+		this.addTaskGroup(processingTaskGroup);
+	}
+    
+public void addTasksOnNewThread(List<CloudletTask> taskList,CloudletTask measurementStartTask, CloudletTask measurementFinishTask, String groupName) {
+    	
+		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		processingTaskGroup.setCloudlet(this);
+		processingTaskGroup.setThreadType(groupName);
+		
+		for(CloudletTask t : taskList) {
+			processingTaskGroup.addTask(t);
+		}
+		
+		processingTaskGroup.setMeasurementStartTask(measurementStartTask);
+		processingTaskGroup.setMeasurementEndTask(measurementFinishTask);
 		
 		this.addTaskGroup(processingTaskGroup);
 	}

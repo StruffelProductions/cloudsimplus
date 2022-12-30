@@ -35,11 +35,21 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 	
 	public abstract CloudletReceiveTask handleNewRequest(String requestType,CloudletSendTask taskToExpectFrom, CloudletReceiveTask taskToReportBackTo);
 	
-	public long getActiveThreadCount() {
+	public long getUnfinishedTaskGroupCount() {
 		long threadCount = 0;
 		
 		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
-			threadCount += c.getAllCurrentTasks().size();
+			threadCount += c.getTaskGroups().stream().filter(g -> !g.isFinished()).count();
+		}
+		
+		return threadCount;
+	}
+	
+	public long getTaskGroupCount() {
+		long threadCount = 0;
+		
+		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
+			threadCount += c.getTaskGroups().size();
 		}
 		
 		return threadCount;
