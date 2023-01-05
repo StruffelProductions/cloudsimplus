@@ -1,4 +1,4 @@
-package microservice.util;
+package microservice.usercountgenerator;
 
 public class ConcurrentUserCountGeneratorConstant implements ConcurrentUserCountGenerator {
 
