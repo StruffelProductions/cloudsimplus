@@ -191,7 +191,14 @@ public abstract class CloudletTask implements Identifiable {
         this.finished = finished;
         
         if(this.finished) {
-        	this.cloudlet.notifyOnTaskFinishListeners();
+        	this.cloudlet.notifyOnTaskFinishListeners(this);
+        	
+        	
+        	
+        	if(this.taskGroup.isFinished()) {
+        		this.cloudlet.notifyOnTaskGroupFinishListeners(this.taskGroup);
+        	}
+        	
         }
         
     }

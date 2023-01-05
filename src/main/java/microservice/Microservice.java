@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.cloudlets.network.CloudletReceiveTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletSendTask;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
 import org.cloudbus.cloudsim.core.Identifiable;
 
@@ -14,4 +15,5 @@ public interface Microservice extends Identifiable {
 	public long getExecutingTaskGroupCount(); 
 	public long getTaskGroupCount(); 
 	public List<MicroserviceNetworkCloudlet> getCloudlets();
+	public void handleTaskGroupFinished(CloudletTaskGroup taskGroup);
 }

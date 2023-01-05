@@ -20,6 +20,7 @@ public class MicroserviceManager {
 	
 	public void registerService(Microservice service) {
 		services.add(service);
+		
 	}
 	
 	public void setClientService(ClientMicroservice clientService) {
@@ -66,7 +67,20 @@ public class MicroserviceManager {
 		responseTimes.add(0.0);
 		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
 			for(CloudletTaskGroup g : c.getTaskGroups()) {
-				if(g.getThreadType() == filterByTaskGroupName && g.getTasks().get(0).getStartTime() >= start && g.measurementFinished()) {
+				if(g.getType() == filterByTaskGroupName && g.getTasks().get(0).getStartTime() >= start && g.measurementFinished()) {
+					responseTimes.add(g.getMeasurementTime());
+				}
+			}
+		}
+		return responseTimes;
+	}
+	
+	public LinkedList<Double> getResponseTimes(double start){
+		LinkedList<Double> responseTimes = new LinkedList<Double>();
+		responseTimes.add(0.0);
+		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
+			for(CloudletTaskGroup g : c.getTaskGroups()) {
+				if(g.getTasks().get(0).getStartTime() >= start && g.measurementFinished()) {
 					responseTimes.add(g.getMeasurementTime());
 				}
 			}
@@ -75,7 +89,7 @@ public class MicroserviceManager {
 	}
 	
 	public void updateClientRequests(int targetClientThreadNumber) {	
-		LOGGER.debug("{} of {} client threads active",clientService.getUnfinishedTaskGroupCount(),targetClientThreadNumber);
+		//LOGGER.debug("{} of {} client threads active",clientService.getUnfinishedTaskGroupCount(),targetClientThreadNumber);
 		if(clientService.getUnfinishedTaskGroupCount() < targetClientThreadNumber) {
 			clientService.handleNewRequest("", null, null);
 		}

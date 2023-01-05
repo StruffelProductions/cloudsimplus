@@ -9,6 +9,7 @@ import org.cloudbus.cloudsim.cloudlets.network.CloudletSendTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
 import org.cloudbus.cloudsim.core.Identifiable;
+import org.cloudsimplus.listeners.TaskGroupEventInfo;
 
 import microservice.loadbalancer.MicroserviceLoadBalancer;
 import microservice.loadbalancer.MicroserviceLoadBalancerRoundRobin;
@@ -32,8 +33,19 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 	public MicroserviceAbstract(MicroserviceManager manager, List<MicroserviceNetworkCloudlet> members) {
 		this(manager);
 		this.memberCloudlets.addAll(members);
+		
+		for(MicroserviceNetworkCloudlet c : memberCloudlets) {
+			c.addOnTaskGroupFinishListener(this::taskGroupFinishedEventHandler);
+		}
+		
 	}
 	
+	private void taskGroupFinishedEventHandler(TaskGroupEventInfo eventInfo) {
+		//System.out.println(eventInfo.getTaskGroup().getType() + " FINISHED");
+		handleTaskGroupFinished(eventInfo.getTaskGroup());
+	}
+	
+	public abstract void handleTaskGroupFinished(CloudletTaskGroup taskGroup);
 	public abstract CloudletReceiveTask handleNewRequest(String requestType,CloudletSendTask taskToExpectFrom, CloudletReceiveTask taskToReportBackTo);
 	
 	public long getUnfinishedTaskGroupCount() {
@@ -108,6 +120,7 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 	}
 	
 	public void addMember(MicroserviceNetworkCloudlet cloudlet) {
+		cloudlet.addOnTaskGroupFinishListener(this::taskGroupFinishedEventHandler);
 		this.memberCloudlets.add(cloudlet);
 	}
 	

@@ -22,7 +22,7 @@ public class CloudletTaskGroup implements Identifiable {
 	private CloudletTask measurementFinishTask;
 	
 	private long id;
-	private String threadType;
+	private String type;
 
 	public CloudletTaskGroup() {
 		tasks = new ArrayList<CloudletTask>();
@@ -117,6 +117,7 @@ public class CloudletTaskGroup implements Identifiable {
 		for(CloudletTask t : this.tasks) {
 			isFinished = t.isFinished() && isFinished;
 		}
+		
 		return isFinished;
 	}
 
@@ -184,12 +185,12 @@ public class CloudletTaskGroup implements Identifiable {
 		return this.id;
 	}
 	
-	public void setThreadType(String threadType) {
-		this.threadType = threadType;
+	public void setType(String type) {
+		this.type = type;
 	}
 	
-	public String getThreadType() {
-		return threadType;
+	public String getType() {
+		return type;
 	}
 
 }

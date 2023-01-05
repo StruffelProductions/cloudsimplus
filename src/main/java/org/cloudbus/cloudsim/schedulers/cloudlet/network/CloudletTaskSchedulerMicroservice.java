@@ -79,10 +79,8 @@ public class CloudletTaskSchedulerMicroservice implements CloudletTaskScheduler 
          * @TODO author: manoelcampos It should be used polymorphism to avoid
          *       including these if's for each type of task.
          */
-        if (isTimeToUpdateCloudletProcessing(netCloudlet))
-            updateExecutionTasks(netCloudlet, partialFinishedMI);
-        else updateNetworkTasks(netCloudlet);
-        //updateNetworkTasks(netCloudlet);
+        if (isTimeToUpdateCloudletProcessing(netCloudlet)) updateExecutionTasks(netCloudlet, partialFinishedMI);
+        updateNetworkTasks(netCloudlet);
         updateWaitTasks(netCloudlet);
     }
     

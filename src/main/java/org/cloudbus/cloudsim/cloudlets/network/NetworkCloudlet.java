@@ -13,6 +13,8 @@ import org.cloudbus.cloudsim.vms.Vm;
 import org.cloudbus.cloudsim.vms.network.NetworkVm;
 import org.cloudsimplus.listeners.CloudletVmEventInfo;
 import org.cloudsimplus.listeners.EventListener;
+import org.cloudsimplus.listeners.TaskEventInfo;
+import org.cloudsimplus.listeners.TaskGroupEventInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,8 @@ public class NetworkCloudlet extends CloudletSimple {
     private CloudletTaskGroup defaultTaskGroup;
     Logger LOGGER = LoggerFactory.getLogger(this.getClass().getSimpleName());
     
-    private final Set<EventListener<CloudletVmEventInfo>> onTaskFinishListeners;
+    private final Set<EventListener<TaskEventInfo>> onTaskFinishListeners;
+    private final Set<EventListener<TaskGroupEventInfo>> onTaskGroupFinishListeners;
 
     /**
      * Creates a NetworkCloudlet with no priority and file size and output size equal to 1.
@@ -80,6 +83,7 @@ public class NetworkCloudlet extends CloudletSimple {
         this.defaultTaskGroup.setId(0);
         this.taskGroups = new ArrayList<>();
         this.onTaskFinishListeners = new HashSet<>();
+        this.onTaskGroupFinishListeners = new HashSet<>();
         this.taskGroups.add(defaultTaskGroup);
     }
 
@@ -227,11 +231,24 @@ public class NetworkCloudlet extends CloudletSimple {
 		this.addTaskGroup(processingTaskGroup);
 	}
     
-    public void addTasksOnNewThread(List<CloudletTask> taskList,int measurementStartIndex, int measurementFinishIndex, String groupName) {
+public void addTasksOnNewThread(List<CloudletTask> taskList, String type) {
     	
 		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
 		processingTaskGroup.setCloudlet(this);
-		processingTaskGroup.setThreadType(groupName);
+		processingTaskGroup.setType(type);
+		
+		for(CloudletTask t : taskList) {
+			processingTaskGroup.addTask(t);
+		}
+		
+		this.addTaskGroup(processingTaskGroup);
+	}
+    
+    public void addTasksOnNewThread(List<CloudletTask> taskList,int measurementStartIndex, int measurementFinishIndex, String type) {
+    	
+		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		processingTaskGroup.setCloudlet(this);
+		processingTaskGroup.setType(type);
 		
 		for(CloudletTask t : taskList) {
 			processingTaskGroup.addTask(t);
@@ -243,11 +260,11 @@ public class NetworkCloudlet extends CloudletSimple {
 		this.addTaskGroup(processingTaskGroup);
 	}
     
-public void addTasksOnNewThread(List<CloudletTask> taskList,CloudletTask measurementStartTask, CloudletTask measurementFinishTask, String groupName) {
+public void addTasksOnNewThread(List<CloudletTask> taskList,CloudletTask measurementStartTask, CloudletTask measurementFinishTask, String type) {
     	
 		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
 		processingTaskGroup.setCloudlet(this);
-		processingTaskGroup.setThreadType(groupName);
+		processingTaskGroup.setType(type);
 		
 		for(CloudletTask t : taskList) {
 			processingTaskGroup.addTask(t);
@@ -275,17 +292,32 @@ public void addTasksOnNewThread(List<CloudletTask> taskList,CloudletTask measure
         throw new IllegalArgumentException("NetworkCloudlet can just be executed by a NetworkVm");
     }
     
-    public Cloudlet addOnTaskFinishListener(final EventListener<CloudletVmEventInfo> listener) {
+    public NetworkCloudlet addOnTaskFinishListener(final EventListener<TaskEventInfo> listener) {
         this.onTaskFinishListeners.add(requireNonNull(listener));
         return this;
     }
 
-    public boolean removeOnTaskFinishListener(final EventListener<CloudletVmEventInfo> listener) {
+    public boolean removeOnTaskFinishListener(final EventListener<TaskEventInfo> listener) {
         return onTaskFinishListeners.remove(listener);
     }
     
-    protected void notifyOnTaskFinishListeners() {
-    	onTaskFinishListeners.forEach(listener -> listener.update(CloudletVmEventInfo.of(listener, this)));
+    protected void notifyOnTaskFinishListeners(CloudletTask task) {
+    	assert task.getCloudlet() == this;
+    	onTaskFinishListeners.forEach(listener -> listener.update(TaskEventInfo.of(listener, task)));
+    }
+    
+    public NetworkCloudlet addOnTaskGroupFinishListener(final EventListener<TaskGroupEventInfo> listener) {
+        this.onTaskGroupFinishListeners.add(requireNonNull(listener));
+        return this;
+    }
+
+    public boolean removeOnTaskGroupFinishListener(final EventListener<TaskGroupEventInfo> listener) {
+        return onTaskGroupFinishListeners.remove(listener);
+    }
+    
+    protected void notifyOnTaskGroupFinishListeners(CloudletTaskGroup taskGroup) {
+    	assert taskGroup.getCloudlet() == this;
+    	onTaskGroupFinishListeners.forEach(listener -> listener.update(TaskGroupEventInfo.of(listener, taskGroup)));
     }
     
 }
