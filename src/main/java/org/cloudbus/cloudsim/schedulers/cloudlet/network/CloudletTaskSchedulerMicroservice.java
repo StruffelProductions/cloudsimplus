@@ -104,32 +104,22 @@ public class CloudletTaskSchedulerMicroservice implements CloudletTaskScheduler 
          */
     	
     	long peCount = cloudlet.getNumberOfPes();
-    	List<CloudletTask> allCurrentExecutionTasks = cloudlet.getAllCurrentTasks().stream().filter(CloudletTask::isExecutionTask).collect(Collectors.toList());
-    	
+    	ArrayList<CloudletTask> allCurrentExecutionTasks = (ArrayList<CloudletTask>) cloudlet.getAllCurrentTasks().stream().filter(CloudletTask::isExecutionTask).collect(Collectors.toList());
+    	Collections.shuffle(allCurrentExecutionTasks);
     	
     	int numberOfCurrentExecutionTasks = allCurrentExecutionTasks.size();
-    	long remainingMI = partialFinishedMI * peCount ; //HACK
-    	
-    	/*long simpleDivision = remainingMI / numberOfCurrentExecutionTasks;
-    	
-    	for( int i = 0 ; i < numberOfCurrentExecutionTasks ; i++) {
-    		receivedMI[i] = simpleDivision;
-    	}
-    	
-    	remainingMI = remainingMI % numberOfCurrentExecutionTasks;*/
-    	
+    	long remainingMI = partialFinishedMI * peCount ; 
+
     	int i = numberOfCurrentExecutionTasks-1; //CcspUtil.random.nextInt(0,numberOfCurrentExecutionTasks);
+    	
+    	
+    	
     	while(remainingMI > 0) {
     		((CloudletExecutionTask) allCurrentExecutionTasks.get(i)).process(1);
     		remainingMI--;
     		i = Math.abs( (i - 1) % numberOfCurrentExecutionTasks );
     	}
-    	
-    	
-    	for(i = 0 ; i < numberOfCurrentExecutionTasks ; i++) {
-    		//((CloudletExecutionTask) allCurrentExecutionTasks.get(i)).process(receivedMI[i]);
-    	}
-    	
+
     	
     	//scheduleNextTaskForAllGroupsWhereCurrentIsFinished(cloudlet);
     }
