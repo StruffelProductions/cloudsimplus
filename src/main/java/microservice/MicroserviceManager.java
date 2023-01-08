@@ -75,12 +75,12 @@ public class MicroserviceManager {
 		return responseTimes;
 	}
 	
-	public LinkedList<Double> getResponseTimes(double start){
+	public LinkedList<Double> getResponseTimes(double minStartTime,double minEndTime){
 		LinkedList<Double> responseTimes = new LinkedList<Double>();
 		responseTimes.add(0.0);
 		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
 			for(CloudletTaskGroup g : c.getTaskGroups()) {
-				if(g.getTasks().get(0).getStartTime() >= start && g.measurementFinished()) {
+				if(g.getTasks().get(0).getStartTime() >= minStartTime && g.getTasks().get(0).getFinishTime() >= minEndTime && g.measurementFinished()) {
 					responseTimes.add(g.getMeasurementTime());
 				}
 			}
