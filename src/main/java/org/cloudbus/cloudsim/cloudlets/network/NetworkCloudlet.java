@@ -51,8 +51,8 @@ import java.util.*;
 public class NetworkCloudlet extends CloudletSimple {
 
     /** @see #getTasks() */
-    private final List<CloudletTaskGroup> taskGroups;
-    private CloudletTaskGroup defaultTaskGroup;
+    private final List<CloudletTaskThread> taskGroups;
+    private CloudletTaskThread defaultTaskGroup;
     Logger LOGGER = LoggerFactory.getLogger(this.getClass().getSimpleName());
     
     private final Set<EventListener<TaskEventInfo>> onTaskFinishListeners;
@@ -78,7 +78,7 @@ public class NetworkCloudlet extends CloudletSimple {
      */
     public NetworkCloudlet(final int id,  final long length, final int pesNumber) {
         super(id, length, pesNumber);
-        this.defaultTaskGroup = new CloudletTaskGroup();
+        this.defaultTaskGroup = new CloudletTaskThread();
         this.defaultTaskGroup.setCloudlet(this);
         this.defaultTaskGroup.setId(0);
         this.taskGroups = new ArrayList<>();
@@ -91,7 +91,7 @@ public class NetworkCloudlet extends CloudletSimple {
     	
     	int numberOfTasks = 0;
     	
-    	for(CloudletTaskGroup g : taskGroups) {
+    	for(CloudletTaskThread g : taskGroups) {
     		numberOfTasks += g.getNumberOfTasks();
     	}
     	
@@ -105,14 +105,14 @@ public class NetworkCloudlet extends CloudletSimple {
     	
     	ArrayList<CloudletTask> list = new ArrayList<CloudletTask>();
     	
-    	for(CloudletTaskGroup g : taskGroups) {
+    	for(CloudletTaskThread g : taskGroups) {
     		list.addAll(g.getTasks());
     	}
     	
         return Collections.unmodifiableList(list);
     }
     
-    public List<CloudletTaskGroup> getTaskGroups(){
+    public List<CloudletTaskThread> getTaskGroups(){
     	return Collections.unmodifiableList(taskGroups);
     }
 
@@ -126,7 +126,7 @@ public class NetworkCloudlet extends CloudletSimple {
     	
     	boolean tasksStarted = false;
     	
-    	for(CloudletTaskGroup g : taskGroups) {
+    	for(CloudletTaskThread g : taskGroups) {
     		tasksStarted = g.isActive() || tasksStarted;
     	}
     	
@@ -145,7 +145,7 @@ public class NetworkCloudlet extends CloudletSimple {
     public List<CloudletTask> getAllCurrentTasks(){
     	ArrayList<CloudletTask> allCurrentTasks = new ArrayList<CloudletTask>();
     	
-    	for(CloudletTaskGroup g : getTaskGroups()) {
+    	for(CloudletTaskThread g : getTaskGroups()) {
     		g.getCurrentTask().ifPresent(task -> allCurrentTasks.add(task));
     	}
     	
@@ -155,7 +155,7 @@ public class NetworkCloudlet extends CloudletSimple {
 
     @Override
     public boolean isFinished() {
-        final boolean allTasksFinished = taskGroups.stream().allMatch(CloudletTaskGroup::isFinished);
+        final boolean allTasksFinished = taskGroups.stream().allMatch(CloudletTaskThread::isFinished);
         return super.isFinished() && allTasksFinished;
     }
 
@@ -168,7 +168,7 @@ public class NetworkCloudlet extends CloudletSimple {
     @Override
     public long getLength() {
         return getTaskGroups().stream()
-                .mapToLong(CloudletTaskGroup::getLength)
+                .mapToLong(CloudletTaskThread::getLength)
                 .sum();
     }
 
@@ -191,21 +191,21 @@ public class NetworkCloudlet extends CloudletSimple {
     	
     	boolean taskWasStarted = false;
     	
-    	for(CloudletTaskGroup g : getTaskGroups()) {
+    	for(CloudletTaskThread g : getTaskGroups()) {
     		taskWasStarted = g.startNextTaskIfCurrentIsFinished(nextTaskStartTime) || taskWasStarted;
     	}
     	
     	return taskWasStarted;
     }
     
-    public NetworkCloudlet removeTaskGroup(final CloudletTaskGroup taskGroup) {
+    public NetworkCloudlet removeTaskGroup(final CloudletTaskThread taskGroup) {
     	Objects.requireNonNull(taskGroup);
     	
     	taskGroups.remove(taskGroup);
     	return this;
     }
     
-    public NetworkCloudlet addTaskGroup(final CloudletTaskGroup taskGroup) {
+    public NetworkCloudlet addTaskGroup(final CloudletTaskThread taskGroup) {
     	
     	Objects.requireNonNull(taskGroup);
     	taskGroups.add(taskGroup);
@@ -221,7 +221,7 @@ public class NetworkCloudlet extends CloudletSimple {
     
     public void addTasksOnNewThread(List<CloudletTask> taskList) {
 
-		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		CloudletTaskThread processingTaskGroup = new CloudletTaskThread();
 		processingTaskGroup.setCloudlet(this);
 		
 		for(CloudletTask t : taskList) {
@@ -233,7 +233,7 @@ public class NetworkCloudlet extends CloudletSimple {
     
 public void addTasksOnNewThread(List<CloudletTask> taskList, String type) {
     	
-		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		CloudletTaskThread processingTaskGroup = new CloudletTaskThread();
 		processingTaskGroup.setCloudlet(this);
 		processingTaskGroup.setType(type);
 		
@@ -246,7 +246,7 @@ public void addTasksOnNewThread(List<CloudletTask> taskList, String type) {
     
     public void addTasksOnNewThread(List<CloudletTask> taskList,int measurementStartIndex, int measurementFinishIndex, String type) {
     	
-		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		CloudletTaskThread processingTaskGroup = new CloudletTaskThread();
 		processingTaskGroup.setCloudlet(this);
 		processingTaskGroup.setType(type);
 		
@@ -262,7 +262,7 @@ public void addTasksOnNewThread(List<CloudletTask> taskList, String type) {
     
 public void addTasksOnNewThread(List<CloudletTask> taskList,CloudletTask measurementStartTask, CloudletTask measurementFinishTask, String type) {
     	
-		CloudletTaskGroup processingTaskGroup = new CloudletTaskGroup();
+		CloudletTaskThread processingTaskGroup = new CloudletTaskThread();
 		processingTaskGroup.setCloudlet(this);
 		processingTaskGroup.setType(type);
 		
@@ -315,7 +315,7 @@ public void addTasksOnNewThread(List<CloudletTask> taskList,CloudletTask measure
         return onTaskGroupFinishListeners.remove(listener);
     }
     
-    protected void notifyOnTaskGroupFinishListeners(CloudletTaskGroup taskGroup) {
+    protected void notifyOnTaskGroupFinishListeners(CloudletTaskThread taskGroup) {
     	assert taskGroup.getCloudlet() == this;
     	onTaskGroupFinishListeners.forEach(listener -> listener.update(TaskGroupEventInfo.of(listener, taskGroup)));
     }

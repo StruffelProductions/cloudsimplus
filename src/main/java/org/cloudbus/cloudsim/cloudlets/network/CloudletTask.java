@@ -57,7 +57,7 @@ public abstract class CloudletTask implements Identifiable {
     /** @see #getCloudlet() */
     private NetworkCloudlet cloudlet;
     
-    private CloudletTaskGroup taskGroup;
+    private CloudletTaskThread taskGroup;
     /**
      * Creates a new task.
      * @param id task id
@@ -75,12 +75,12 @@ public abstract class CloudletTask implements Identifiable {
     	this.taskGroup = null;
     }
 
-    public void setTaskGroup(CloudletTaskGroup taskGroup) {
+    public void setTaskGroup(CloudletTaskThread taskGroup) {
     	this.taskGroup = taskGroup;
     	//taskGroup.addTask(this);
     }
 
-    public CloudletTaskGroup getTaskGroup() {
+    public CloudletTaskThread getTaskGroup() {
     	return taskGroup;
     }
 

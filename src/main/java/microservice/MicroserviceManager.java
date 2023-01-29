@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.cloudsimplus.util.Log;
-import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskThread;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class MicroserviceManager {
 		LinkedList<Double> responseTimes = new LinkedList<Double>();
 		responseTimes.add(0.0);
 		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
-			for(CloudletTaskGroup g : c.getTaskGroups()) {
+			for(CloudletTaskThread g : c.getTaskGroups()) {
 				if(g.getType() == filterByTaskGroupName && g.getTasks().get(0).getStartTime() >= start && g.measurementFinished()) {
 					responseTimes.add(g.getMeasurementTime());
 				}
@@ -79,7 +79,7 @@ public class MicroserviceManager {
 		LinkedList<Double> responseTimes = new LinkedList<Double>();
 		responseTimes.add(0.0);
 		for(MicroserviceNetworkCloudlet c : clientService.getCloudlets()) {
-			for(CloudletTaskGroup g : c.getTaskGroups()) {
+			for(CloudletTaskThread g : c.getTaskGroups()) {
 				if(g.getTasks().get(0).getStartTime() >= minStartTime && g.getTasks().get(0).getFinishTime() >= minEndTime && g.measurementFinished()) {
 					responseTimes.add(g.getMeasurementTime());
 				}

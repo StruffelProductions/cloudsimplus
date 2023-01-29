@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.cloudlets.network.CloudletReceiveTask;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletSendTask;
-import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskThread;
 import org.cloudbus.cloudsim.cloudlets.network.MicroserviceNetworkCloudlet;
 import org.cloudbus.cloudsim.core.Identifiable;
 import org.cloudsimplus.listeners.TaskGroupEventInfo;
@@ -45,7 +45,7 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 		handleTaskGroupFinished(eventInfo.getTaskGroup());
 	}
 	
-	public abstract void handleTaskGroupFinished(CloudletTaskGroup taskGroup);
+	public abstract void handleTaskGroupFinished(CloudletTaskThread taskGroup);
 	public abstract CloudletReceiveTask handleNewRequest(String requestType,CloudletSendTask taskToExpectFrom, CloudletReceiveTask taskToReportBackTo);
 	
 	public long getUnfinishedTaskGroupCount() {
@@ -62,7 +62,7 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 		long threadCount = 0;
 		
 		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
-			for(CloudletTaskGroup g : c.getTaskGroups()) {
+			for(CloudletTaskThread g : c.getTaskGroups()) {
 				if(g.getCurrentTask().isPresent() && g.getCurrentTask().get().isExecutionTask()) {
 					threadCount++;
 				}

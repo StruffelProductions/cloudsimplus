@@ -2,7 +2,7 @@ package org.cloudsimplus.listeners;
 
 import org.cloudbus.cloudsim.cloudlets.Cloudlet;
 import org.cloudbus.cloudsim.cloudlets.network.CloudletTask;
-import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskGroup;
+import org.cloudbus.cloudsim.cloudlets.network.CloudletTaskThread;
 
 public interface TaskEventInfo extends EventInfo {
 	CloudletTask getTask();

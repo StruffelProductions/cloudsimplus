@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.cloudbus.cloudsim.core.CloudSimTag;
 import org.cloudbus.cloudsim.core.Identifiable;
 
-public class CloudletTaskGroup implements Identifiable {
+public class CloudletTaskThread implements Identifiable {
 
 	private List<CloudletTask> tasks;
 
@@ -24,13 +24,13 @@ public class CloudletTaskGroup implements Identifiable {
 	private long id;
 	private String type;
 
-	public CloudletTaskGroup() {
+	public CloudletTaskThread() {
 		tasks = new ArrayList<CloudletTask>();
 		currentTaskNum = -1;
 		id = -1;
 	}
 
-	public CloudletTaskGroup(List<CloudletTask> taskList) {
+	public CloudletTaskThread(List<CloudletTask> taskList) {
 		this();
 		tasks.addAll(taskList);
 	}
