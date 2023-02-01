@@ -90,7 +90,7 @@ public class MicroserviceManager {
 	
 	public void updateClientRequests(int targetClientThreadNumber) {	
 		//LOGGER.debug("{} of {} client threads active",clientService.getUnfinishedTaskGroupCount(),targetClientThreadNumber);
-		if(clientService.getUnfinishedTaskGroupCount() < targetClientThreadNumber) {
+		if(clientService.getUnfinishedTaskThreadCount() < targetClientThreadNumber) {
 			clientService.handleNewRequest("", null, null);
 		}
 	}

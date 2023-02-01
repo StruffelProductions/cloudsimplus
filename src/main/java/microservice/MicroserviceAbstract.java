@@ -48,7 +48,7 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 	public abstract void handleTaskGroupFinished(CloudletTaskThread taskGroup);
 	public abstract CloudletReceiveTask handleNewRequest(String requestType,CloudletSendTask taskToExpectFrom, CloudletReceiveTask taskToReportBackTo);
 	
-	public long getUnfinishedTaskGroupCount() {
+	public long getUnfinishedTaskThreadCount() {
 		long threadCount = 0;
 		
 		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
@@ -58,7 +58,7 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 		return threadCount;
 	}
 	
-	public long getExecutingTaskGroupCount() {
+	public long getExecutingTaskThreadCount() {
 		long threadCount = 0;
 		
 		for(MicroserviceNetworkCloudlet c : getCloudlets()) {
@@ -72,7 +72,7 @@ public abstract class MicroserviceAbstract implements Identifiable, Microservice
 		return threadCount;
 	}
 	
-	public long getTaskGroupCount() {
+	public long getTaskThreadCount() {
 		long threadCount = 0;
 		
 		for(MicroserviceNetworkCloudlet c : getCloudlets()) {

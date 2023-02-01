@@ -11,9 +11,9 @@ import org.cloudbus.cloudsim.core.Identifiable;
 public interface Microservice extends Identifiable {
 	public String getName();
 	public CloudletReceiveTask handleNewRequest(String requestType,CloudletSendTask taskToExpectFrom, CloudletReceiveTask taskToReportBackTo);
-	public long getUnfinishedTaskGroupCount(); 
-	public long getExecutingTaskGroupCount(); 
-	public long getTaskGroupCount(); 
+	public long getUnfinishedTaskThreadCount(); 
+	public long getExecutingTaskThreadCount(); 
+	public long getTaskThreadCount(); 
 	public List<MicroserviceNetworkCloudlet> getCloudlets();
 	public void handleTaskGroupFinished(CloudletTaskThread taskGroup);
 }
